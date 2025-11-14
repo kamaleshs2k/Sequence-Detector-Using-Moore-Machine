@@ -53,126 +53,110 @@ The sequence detector should produce an output `Z = 1` whenever the input sequen
 ---
 
 ## **Program**
-
 ```verilog
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 03.10.2025 10:23:30
-// Design Name: 
-// Module Name: moore
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-
-module moore(clk,reset,in,out);
-input clk,reset,in;         
-output reg out;   
-parameter  S0 = 3'b000, 
-           S1 = 3'b001, 
-           S2 = 3'b010, 
-           S3 = 3'b011, 
-           S4 = 3'b100; 
+module mooresequence(clk, rst, in, out);
+    input clk;
+    input rst;
+    input in;
+    output reg out;
+parameter S0 = 3'b000,
+              S1 = 3'b001,
+              S2 = 3'b010,
+              S3 = 3'b011,
+              S4 = 3'b100;
 reg [2:0] current_state, next_state;
-always @(posedge clk or posedge reset) 
-begin
-if (reset)
-current_state <= S0;
-else
-current_state <= next_state;
-end
-always @(*) begin
-case (current_state)
-S0:begin
-if (in) 
-next_state = S1; 
-else 
-next_state = S0;
-end
-S1: begin
-if (in)
-next_state = S1;
-else
-next_state = S2;
-end
-S2: begin
-if (in)
-next_state = S3;
-else
-next_state = S0;
-end
-S3: begin
-if (in)
-next_state = S4;
-else
-next_state = S2;
-end
-S4: begin
-if (in)
-next_state = S1;
-else
-next_state = S0; 
-end
+always @(posedge clk or posedge rst) begin
+        if (rst)
+            current_state <= S0;
+        else
+            current_state <= next_state;
+    end
+  always @(*) begin
+        case (current_state)
+            S0: if (in)
+                    next_state = S1;
+                else
+                    next_state = S0;
 
-default: next_state = S0;
-endcase
-end
-always @(*) 
-begin
-case (current_state)
-S4:out = 1'b1;
-default: out = 1'b0;
-endcase
-end
+            S1: begin
+                if (in)
+                    next_state = S1;
+                else
+                    next_state = S2;
+            end
+
+            S2: begin
+                if (in)
+                    next_state = S3;
+                else
+                    next_state = S0;
+            end
+
+            S3: begin
+                if (in)
+                    next_state = S4;
+                else
+                    next_state = S2;
+            end
+
+            S4: begin
+                if (in)
+                    next_state = S1;
+                else
+                    next_state = S0;
+            end
+
+            default: next_state = S0;
+        endcase
+    end
+
+    always @(*) begin
+        case (current_state)
+            S4: out = 1'b1;
+            default: out = 1'b0;
+        endcase
+    end
 endmodule
 
 ```
 ### Testbench
 ```
-module tb_moore;
-reg clk,reset,in;
-wire out;
-moore uut(clk,reset,in,out);
-initial 
-begin
-clk=0;
-forever #5 clk=~clk;
-end
-initial
-begin
-clk=0;
-reset=1;
-in=0;
-#10 reset=0;
-#10 in=1;
-#10 in=1;
-#10 in=0;
-#10 in=1;
-#10 in=0;
-#10 in=1;
-#10 in=1;
-#10 in=0;
-#10 in=0;
-#20 $finish;
-end 
+
+
+`timescale 1ns/1ps
+module tb_mooresequence;
+    reg clk, rst, in;
+    wire out;
+
+    mooresequence uut (clk, rst, in, out);
+
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;
+    end
+
+    initial begin
+        rst = 1;
+        in = 0;
+        #10 rst = 0;
+
+        in = 1; #10;
+        in = 0; #10;
+        in = 1; #10;
+        in = 1; #10;
+        
+        in = 1; #10;
+        in = 0; #10;
+        in = 1; #10;
+        in = 0; #10;
+
+        #10 $finish;
+    end
 endmodule
-
-
 
 ```
 ### Simulation Output
+<img width="1280" height="720" alt="image" src="https://github.com/user-attachments/assets/103802b0-bcb7-4cb9-8e43-935ea0800951" />
 
 
 ### Result
